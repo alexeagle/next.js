@@ -1,0 +1,17 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "pkg_npm")
+load("@npm//@bazel/typescript:index.bzl", "ts_project")
+
+ts_project(
+    name = "compile_ts",
+    srcs = glob(["*/**/*.ts", "*/**/*.tsx"]),
+    tsconfig = "tsconfig.json",
+    deps = [
+        # Depend on ALL packages in root package.json
+        "@npm//:node_modules",
+    ],
+)
+
+pkg_npm(
+    name = "npm_package",
+    deps = ["compile_ts"],
+)

@@ -115,6 +115,25 @@ EXAMPLE=./test/integration/basic
    yarn install --force
    ```
 
+## Building with Bazel
+
+This is currently experimental. We are investigating using [Bazel] to build and test the monorepo.
+Follow https://github.com/vercel/next.js/issues/14778 for progress.
+
+Try it with
+
+```sh
+% npx bazel build //packages/next
+```
+
+or in the root directory you can
+
+```sh
+% yarn run dev:bazel
+```
+
+[bazel]: https://bazel.build
+
 ## Adding examples
 
 When you add an example to the [examples](examples) directory, don’t forget to add a `README.md` file with the following format:

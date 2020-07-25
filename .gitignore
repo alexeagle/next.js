@@ -1,6 +1,7 @@
 # build output
 dist
 .next
+bazel-out
 
 # dependencies
 node_modules
