@@ -1,17 +1,69 @@
 load("@build_bazel_rules_nodejs//:index.bzl", "pkg_npm")
 load("@npm//@bazel/typescript:index.bzl", "ts_project")
+load("@npm//@babel/cli:index.bzl", "babel")
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 
 ts_project(
-    name = "compile_ts",
-    srcs = glob(["*/**/*.ts", "*/**/*.tsx"]),
+    name = "generate_types",
+    srcs = glob([
+        "*/**/*.ts*",
+    ]),
+    declaration = True,
+    emit_declaration_only = True,
     tsconfig = "tsconfig.json",
     deps = [
         # Depend on ALL packages in root package.json
+        # TODO: it's more performant to select the required subset
         "@npm//:node_modules",
+    ],
+)
+
+babel(
+    name = "transpile_js",
+    data = glob([
+      "build/**/*.ts*",
+    ]) + [
+        "client.babelrc",
+    ],
+    output_dir = True,
+    args = [
+        "packages/next/build",
+        "--config-file",
+        "$(execpath client.babelrc)",
+        "--out-dir",
+        "$(@D)",
+        "--verbose",
+    ],
+)
+
+copy_file(
+    name = "copy_license",
+    src = "//:license.md",
+    out = "license.md",
+)
+
+# This effectively relocates some of the inputs to a "dist" subdirectory
+pkg_npm(
+    name = "dist/dist_files",
+    deps = [
+        "generate_types",
+        "transpile_js",
     ],
 )
 
 pkg_npm(
     name = "npm_package",
-    deps = ["compile_ts"],
+    nested_packages = ["dist/dist_files"],
+    # TODO: remove files[] block from package.json after bazel switch
+    # Bazel needs that info here to declare inputs, and there's no need
+    # to have it in both places
+    srcs = glob(["*.js", "*.d.ts"], exclude = ["taskfile*"]) + [
+        "README.md",
+        "package.json",
+        "types/global.d.ts",
+        "types/index.d.ts",
+    ],
+    deps = [
+        "copy_license",
+    ]
 )

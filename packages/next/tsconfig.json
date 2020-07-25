@@ -5,7 +5,9 @@
     "target": "ES2017",
     "esModuleInterop": true,
     "moduleResolution": "node",
-    "jsx": "react"
+    "jsx": "react",
+    "declaration": true,
+    "emitDeclarationOnly": true
   },
   "exclude": ["dist", "./*.d.ts"]
 }
